@@ -7,7 +7,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(entities = [PictureDbo::class], version = 1)
-@TypeConverters(Converter::class)
 abstract class PictureDatabase: RoomDatabase() {
     abstract fun getPictureDao(): PictureDao
     companion object{

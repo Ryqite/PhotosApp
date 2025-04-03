@@ -43,19 +43,26 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.example.pix.R
+import com.example.pix.data.flickr.FlickrRepository
 import com.example.pix.data.room.PictureDatabase
 import com.example.pix.data.viewmodel.PicturesViewModel
 import com.example.pix.ui.theme.PixTheme
 import kotlinx.coroutines.flow.Flow
 
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<PicturesViewModel>()
+//    private val viewModel by viewModels<PicturesViewModel>()
 
     @OptIn(ExperimentalGlideComposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val intent by lazy { Intent(this, SecondScreen::class.java) }
-        val database by lazy { PictureDatabase.getDB(this) }
+        val database = PictureDatabase.getDB(this)
+        val repository = FlickrRepository(database)
+        val viewModel = PicturesViewModel(repository)
+        viewModel.apply {
+        search()
+        savePictures()
+        }
         val path = listOf(
             "https://s0.rbk.ru/v6_top_pics/media/img/0/61/346832026749610.webp",
             "https://storage.yandexcloud.net/yac-wh-sb-prod-s3-media-03002/uploads/article/479/986f7b060354304438c245f8f3eed143.webp"
