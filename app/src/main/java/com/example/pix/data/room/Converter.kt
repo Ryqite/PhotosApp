@@ -10,6 +10,6 @@ class Converter {
     }
     @TypeConverter
     fun toPicture(url: String): Picture{
-        return Picture(url,url)
+        return Picture(url,title="")
     }
 }
