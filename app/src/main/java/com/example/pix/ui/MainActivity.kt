@@ -48,6 +48,7 @@ import com.example.pix.data.room.PictureDatabase
 import com.example.pix.data.viewmodel.PicturesViewModel
 import com.example.pix.ui.theme.PixTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class MainActivity : ComponentActivity() {
 //    private val viewModel by viewModels<PicturesViewModel>()
@@ -62,11 +63,9 @@ class MainActivity : ComponentActivity() {
         viewModel.apply {
         search()
         savePictures()
+        getPictures()
         }
-        val path = listOf(
-            "https://s0.rbk.ru/v6_top_pics/media/img/0/61/346832026749610.webp",
-            "https://storage.yandexcloud.net/yac-wh-sb-prod-s3-media-03002/uploads/article/479/986f7b060354304438c245f8f3eed143.webp"
-        )
+        val path = viewModel.getPicturesList.map { it.url }
         setContent {
             PixTheme {
                 LazyVerticalGrid(
@@ -119,3 +118,7 @@ class MainActivity : ComponentActivity() {
 //            }
 //    }
 }
+//listOf(
+//"https://s0.rbk.ru/v6_top_pics/media/img/0/61/346832026749610.webp",
+//"https://storage.yandexcloud.net/yac-wh-sb-prod-s3-media-03002/uploads/article/479/986f7b060354304438c245f8f3eed143.webp"
+//)

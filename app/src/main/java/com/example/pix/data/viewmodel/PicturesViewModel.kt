@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class PicturesViewModel(val flickrRepository: FlickrRepository): ViewModel() {
     private val _picturesFlow = MutableStateFlow<Result<List<Picture>>>(Result.success(emptyList()))
-    val picturesFlow: StateFlow<Result<List<Picture>>> = _picturesFlow.asStateFlow()
+    lateinit var getPicturesList: List<Picture>
     fun search()= viewModelScope.launch{
         _picturesFlow.value = flickrRepository.search()
     }
@@ -28,6 +28,8 @@ class PicturesViewModel(val flickrRepository: FlickrRepository): ViewModel() {
             })
         flickrRepository.savePictures(result)
     }
-    fun getPictures()=viewModelScope.launch{flickrRepository.getPictures()}
+    fun getPictures()=viewModelScope.launch{
+        getPicturesList=flickrRepository.getPictures()
+    }
     fun deletePictures()=viewModelScope.launch{flickrRepository.deletePictures()}
 }
