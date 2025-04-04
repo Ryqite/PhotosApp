@@ -19,32 +19,19 @@ class PicturesViewModel(private val flickrRepository: FlickrRepository) : ViewMo
     val pictures: StateFlow<List<Picture>> = _pictures.asStateFlow()
 
     init {
-        Log.d("ViewModel", "ViewModel initialized")
         loadPicturesFromDb()
     }
 
     private fun loadPicturesFromDb() = viewModelScope.launch {
-        try {
-            Log.d("ViewModel", "Starting DB load")
             _pictures.value = flickrRepository.getPictures()
-            Log.d("ViewModel", "DB returned ${pictures.value.size} pictures")
-        } catch (e: Exception) {
-            Log.e("ViewModel", "DB load error", e)
-        }
     }
 
     fun loadAndSavePictures() = viewModelScope.launch {
-        try {
-            Log.d("ViewModel", "Starting network load")
             val result = flickrRepository.search()
             result.onSuccess { pictures ->
-                Log.d("ViewModel", "Network returned ${pictures.size} pictures")
                 flickrRepository.savePictures(pictures)
             }.onFailure { e ->
                 Log.e("ViewModel", "Network error", e)
             }
-        } catch (e: Exception) {
-            Log.e("ViewModel", "Load error", e)
-        }
     }
 }

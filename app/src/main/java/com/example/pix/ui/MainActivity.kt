@@ -54,8 +54,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class MainActivity : ComponentActivity() {
-//    private val viewModel by viewModels<PicturesViewModel>()
-
     @OptIn(ExperimentalGlideComposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
