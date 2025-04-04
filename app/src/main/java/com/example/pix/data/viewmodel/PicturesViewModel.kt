@@ -14,24 +14,37 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
-class PicturesViewModel(val flickrRepository: FlickrRepository): ViewModel() {
-
+class PicturesViewModel(private val flickrRepository: FlickrRepository) : ViewModel() {
     private val _pictures = MutableStateFlow<List<Picture>>(emptyList())
     val pictures: StateFlow<List<Picture>> = _pictures.asStateFlow()
+
     init {
-        getPictures()
-    }
-    private fun getPictures() = viewModelScope.launch {
-        _pictures.value = flickrRepository.getPictures()
+        Log.d("ViewModel", "ViewModel initialized")
+        loadPicturesFromDb()
     }
 
-    fun clearDatabase()=viewModelScope.launch{flickrRepository.deletePictures()}
+    private fun loadPicturesFromDb() = viewModelScope.launch {
+        try {
+            Log.d("ViewModel", "Starting DB load")
+            _pictures.value = flickrRepository.getPictures()
+            Log.d("ViewModel", "DB returned ${pictures.value.size} pictures")
+        } catch (e: Exception) {
+            Log.e("ViewModel", "DB load error", e)
+        }
+    }
+
     fun loadAndSavePictures() = viewModelScope.launch {
-        flickrRepository.search()
-        .onSuccess { pictures ->
-           flickrRepository.savePictures(pictures)
-        }.onFailure { e ->
-            Log.e("ViewModel", "Ошибка загрузки: ${e.message}")
+        try {
+            Log.d("ViewModel", "Starting network load")
+            val result = flickrRepository.search()
+            result.onSuccess { pictures ->
+                Log.d("ViewModel", "Network returned ${pictures.size} pictures")
+                flickrRepository.savePictures(pictures)
+            }.onFailure { e ->
+                Log.e("ViewModel", "Network error", e)
+            }
+        } catch (e: Exception) {
+            Log.e("ViewModel", "Load error", e)
         }
     }
 }

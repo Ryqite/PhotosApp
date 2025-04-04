@@ -1,5 +1,6 @@
 package com.example.pix.data.flickr
 
+import android.util.Log
 import com.example.pix.data.flickr.mapper.toDbo
 import com.example.pix.data.flickr.mapper.toEntity
 import com.example.pix.data.flickr.mapper.toPicture
@@ -20,6 +21,9 @@ class FlickrRepository(
         val pictureDbo = pictures.map { it.toDbo() }
         database.getPictureDao().insertAll(pictureDbo)
     }
-    suspend fun getPictures()=database.getPictureDao().getAll().map { it.toPicture() }
+    suspend fun getPictures(): List<Picture>{
+        Log.d("Repository", "Getting pictures from DB")
+        return database.getPictureDao().getAll().map { it.toPicture() }
+    }
     suspend fun deletePictures()=database.getPictureDao().clearAll()
 }
