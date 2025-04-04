@@ -26,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.Observer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -46,6 +48,7 @@ import com.example.pix.R
 import com.example.pix.data.flickr.FlickrRepository
 import com.example.pix.data.room.PictureDatabase
 import com.example.pix.data.viewmodel.PicturesViewModel
+import com.example.pix.domain.entity.Picture
 import com.example.pix.ui.theme.PixTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -56,69 +59,65 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalGlideComposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intent by lazy { Intent(this, SecondScreen::class.java) }
-        val database = PictureDatabase.getDB(this)
-        val repository = FlickrRepository(database)
-        val viewModel = PicturesViewModel(repository)
-        viewModel.apply {
-        search()
-        savePictures()
-        getPictures()
-        }
-        val path = viewModel.getPicturesList.map { it.url }
+
+        val viewModel = PicturesViewModel(FlickrRepository(PictureDatabase.getDB(this)))
+
+        viewModel.loadAndSavePictures()
         setContent {
             PixTheme {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    itemsIndexed(path) { index, url ->
-                        Card(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .background(Color.LightGray)
-                                .clickable {
-                                    intent.putExtra("PATH", url)
-                                    startActivity(intent)
-                                },
-                            shape = RoundedCornerShape(0.dp)
-                        ) {
-                            GlideImage(
-                                model = url,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
-                            )
+                val picturesState = viewModel.pictures.collectAsState()
+                val pictures=picturesState.value
+                if (pictures.isNotEmpty()) {
+                    PictureGrid(
+                        pictures = pictures,
+                        onPictureClick = { url ->
+                            startActivity(Intent(this, SecondScreen::class.java).apply {
+                                putExtra("PATH", url)
+                            })
                         }
+                    )
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                        Text("Загрузка изображений...")
                     }
                 }
             }
         }
-
     }
 
-//    fun getPictures() {
-//        viewModel.search()
-//        viewModel.picturesFlow.collect{ response ->
-//            when (response) {
-//                is Result.Success -> {
-//
-//                    }
-//                }
-//
-//                is Result.Failure -> {
-//                    response.message?.let { message ->
-//                        Log.e(TAG, "Error: Failure")
-//                    }
-//                }
-//
-//                else -> {}
-//            }
-//    }
+    @OptIn(ExperimentalGlideComposeApi::class)
+    @Composable
+    fun PictureGrid(pictures: List<Picture>, onPictureClick: (String) -> Unit) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            itemsIndexed(pictures) { index, picture ->
+                Card(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .background(Color.LightGray)
+                        .clickable { onPictureClick(picture.url) },
+                    shape = RoundedCornerShape(0.dp)
+                ) {
+                    GlideImage(
+                        model = picture.url,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+    }
 }
 //listOf(
 //"https://s0.rbk.ru/v6_top_pics/media/img/0/61/346832026749610.webp",
 //"https://storage.yandexcloud.net/yac-wh-sb-prod-s3-media-03002/uploads/article/479/986f7b060354304438c245f8f3eed143.webp"
 //)
+
+//val intent by lazy { Intent(this, SecondScreen::class.java) }
+//intent.putExtra("PATH", url)
+//startActivity(intent)

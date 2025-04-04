@@ -11,25 +11,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class PicturesViewModel(val flickrRepository: FlickrRepository): ViewModel() {
-    private val _picturesFlow = MutableStateFlow<Result<List<Picture>>>(Result.success(emptyList()))
-    lateinit var getPicturesList: List<Picture>
-    fun search()= viewModelScope.launch{
-        _picturesFlow.value = flickrRepository.search()
+
+    private val _pictures = MutableStateFlow<List<Picture>>(emptyList())
+    val pictures: StateFlow<List<Picture>> = _pictures.asStateFlow()
+    init {
+        getPictures()
     }
-    fun savePictures()=viewModelScope.launch{
-        val result: List<Picture> = _picturesFlow.value.fold(
-            onSuccess = { it },
-            onFailure = { exception ->
-                Log.e("Error", "${exception.message}")
-                emptyList()
-            })
-        flickrRepository.savePictures(result)
+    private fun getPictures() = viewModelScope.launch {
+        _pictures.value = flickrRepository.getPictures()
     }
-    fun getPictures()=viewModelScope.launch{
-        getPicturesList=flickrRepository.getPictures()
+
+    fun clearDatabase()=viewModelScope.launch{flickrRepository.deletePictures()}
+    fun loadAndSavePictures() = viewModelScope.launch {
+        flickrRepository.search()
+        .onSuccess { pictures ->
+           flickrRepository.savePictures(pictures)
+        }.onFailure { e ->
+            Log.e("ViewModel", "Ошибка загрузки: ${e.message}")
+        }
     }
-    fun deletePictures()=viewModelScope.launch{flickrRepository.deletePictures()}
 }
