@@ -18,18 +18,17 @@ class PicturesViewModel(private val flickrRepository: FlickrRepository) : ViewMo
     private val _pictures = MutableStateFlow<List<Picture>>(emptyList())
     val pictures: StateFlow<List<Picture>> = _pictures.asStateFlow()
 
-    init {
-        loadPicturesFromDb()
-    }
-
-    private fun loadPicturesFromDb() = viewModelScope.launch {
+    private fun getPictures() = viewModelScope.launch {
             _pictures.value = flickrRepository.getPictures()
     }
-
+    fun clearDatabase()=viewModelScope.launch{
+        flickrRepository.deletePictures()
+    }
     fun loadAndSavePictures() = viewModelScope.launch {
             val result = flickrRepository.search()
             result.onSuccess { pictures ->
                 flickrRepository.savePictures(pictures)
+                getPictures()
             }.onFailure { e ->
                 Log.e("ViewModel", "Network error", e)
             }

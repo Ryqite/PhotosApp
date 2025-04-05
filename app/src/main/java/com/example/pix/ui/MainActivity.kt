@@ -59,7 +59,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel = PicturesViewModel(FlickrRepository(PictureDatabase.getDB(this)))
-
+//        viewModel.clearDatabase()
+//        ОЧИЩЕНИЕ БД ДЛЯ ПРОВЕРКИ РАБОТЫ
         viewModel.loadAndSavePictures()
         setContent {
             PixTheme {
@@ -111,11 +112,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-//listOf(
-//"https://s0.rbk.ru/v6_top_pics/media/img/0/61/346832026749610.webp",
-//"https://storage.yandexcloud.net/yac-wh-sb-prod-s3-media-03002/uploads/article/479/986f7b060354304438c245f8f3eed143.webp"
-//)
-
-//val intent by lazy { Intent(this, SecondScreen::class.java) }
-//intent.putExtra("PATH", url)
-//startActivity(intent)
