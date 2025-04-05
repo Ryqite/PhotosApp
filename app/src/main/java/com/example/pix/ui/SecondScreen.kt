@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -44,8 +46,17 @@ class SecondScreen: ComponentActivity() {
                     .padding(4.dp)
                     .fillMaxSize()
                     .background(Color.LightGray)
-                    .transformable(state = rememberTransformableState { zoomChange, _,_->
-                        scale*=zoomChange
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                scale = 1f
+                                offset = Offset.Zero
+                            }
+                        )
+                    }
+                    .transformable(state = rememberTransformableState { zoomChange, panChange,_->
+                        scale*=zoomChange.coerceIn(0.1f,5f)
+                        offset+=panChange
                     }),
                     shape = RoundedCornerShape(0.dp)) {
                     GlideImage(
