@@ -12,3 +12,5 @@ Used libraries: Room, Retrofit and etc.(check gradle for more information)
 Screenshots of how app's working and it's design are below.  
 --------------------------------------------------------------------------------------
 ![{FBE2A766-6934-480C-9C96-982A4A5FACF3}](https://github.com/user-attachments/assets/8920883b-c090-4afa-9797-6a8ee3acc78c)
+![image](https://github.com/user-attachments/assets/6ac0ccdd-c326-446b-bc8c-3e2a19e014ac)
+![image](https://github.com/user-attachments/assets/da19261c-8282-42ba-85d5-f2718bdddfdd)
